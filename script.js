@@ -385,3 +385,105 @@ function getWeatherIcon(code) {
 
     return "🌤️";
 }
+// =================================
+// USE MY CURRENT LOCATION
+// =================================
+
+function getMyLocation() {
+
+    if (!navigator.geolocation) {
+
+        alert("Location is not supported by your browser.");
+
+        return;
+    }
+
+    document.getElementById("condition").innerText =
+        "📍 Getting your location...";
+
+
+    navigator.geolocation.getCurrentPosition(
+
+        async function(position) {
+
+            const latitude =
+                position.coords.latitude;
+
+            const longitude =
+                position.coords.longitude;
+
+
+            try {
+
+                const response =
+                    await fetch(
+
+                        `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&temperature_unit=celsius&wind_speed_unit=kmh&timezone=auto`
+
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                const current =
+                    data.current;
+
+
+                document.getElementById("city-name").innerText =
+                    "📍 Your Current Location";
+
+
+                document.getElementById("temperature").innerText =
+                    `${current.temperature_2m} °C`;
+
+
+                document.getElementById("feels-like").innerText =
+                    `Feels Like: ${current.apparent_temperature} °C`;
+
+
+                document.getElementById("humidity").innerText =
+                    `Humidity: ${current.relative_humidity_2m}%`;
+
+
+                document.getElementById("wind").innerText =
+                    `Wind: ${current.wind_speed_10m} km/h`;
+
+
+                document.getElementById("condition").innerText =
+                    getWeatherCondition(
+                        current.weather_code
+                    );
+
+
+                showForecast(
+                    data.daily
+                );
+
+            }
+
+            catch (error) {
+
+                console.log(error);
+
+                alert(
+                    "Weather data could not be loaded."
+                );
+
+            }
+
+        },
+
+
+        function(error) {
+
+            alert(
+                "Please allow location permission to use this feature."
+            );
+
+        }
+
+    );
+
+}
